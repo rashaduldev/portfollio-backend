@@ -21,8 +21,7 @@ import subscriberRoutes from "./routes/subscriber.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
 import uploadRoutes from "./routes/upload.routes.js";
 
-import helmet from "helmet"; // ✅ correct import for Helmet v8
-
+import helmet from "helmet"; //
 const app: Application = express();
 
 // ─── Security ───────────────────────────────────────────────────────────────
@@ -30,7 +29,7 @@ app.use(helmet());
 app.use(mongoSanitize());
 
 if (process.env.NODE_ENV === "production") {
-  app.set("trust proxy", 1); // if behind proxy like Vercel
+  app.set("trust proxy", 1);
   app.use(
     helmet({
       contentSecurityPolicy: {
