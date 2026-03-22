@@ -1,8 +1,8 @@
 import "dotenv/config";
-import connectDB from "./config/database";
 import http from "http";
-import app from "./app";
-import logger from "./config/logger";
+import connectDB from "./config/database.js";
+import app from "./app.js";
+import logger from "./config/logger.js";
 
 const PORT = parseInt(process.env.PORT ?? "5000", 10);
 

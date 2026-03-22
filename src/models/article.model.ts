@@ -1,6 +1,13 @@
 import mongoose, { Schema } from "mongoose";
-import slugify from "slugify";
 import type { IArticle } from "../types/index.js";
+import * as slugifyPkg from "slugify";
+
+// ─── Fix TypeScript callable issue ──────────────────────────────────────────
+// Force TS to treat slugify as a function
+const slugify = slugifyPkg as unknown as (
+  input: string,
+  options?: { lower?: boolean; strict?: boolean },
+) => string;
 
 const articleSchema = new Schema<IArticle>(
   {
@@ -40,13 +47,14 @@ const articleSchema = new Schema<IArticle>(
   { timestamps: true },
 );
 
-// ─── Pre-save hooks ────────────────────────────────────────────────────────
+// ─── Pre-save hook ─────────────────────────────────────────────────────────
 articleSchema.pre<IArticle>("save", async function (next) {
   // Auto-generate unique slug
   if (this.isModified("title")) {
     const base = slugify(this.title, { lower: true, strict: true });
     let slug = base;
     let count = 1;
+
     while (
       await mongoose
         .model<IArticle>("Article")
@@ -54,6 +62,7 @@ articleSchema.pre<IArticle>("save", async function (next) {
     ) {
       slug = `${base}-${count++}`;
     }
+
     this.slug = slug;
   }
 
@@ -73,12 +82,16 @@ articleSchema.pre<IArticle>("save", async function (next) {
 
   next();
 });
+
+// ─── Indexes ───────────────────────────────────────────────────────────────
 articleSchema.index({ user: 1, status: 1 });
 articleSchema.index({ tags: 1 });
 articleSchema.index({ category: 1, status: 1 });
 articleSchema.index({ title: "text", content: "text", tags: "text" });
 
+// ─── JSON configuration ───────────────────────────────────────────────────
 articleSchema.set("toJSON", { virtuals: true, versionKey: false });
 
+// ─── Export model ─────────────────────────────────────────────────────────
 const Article = mongoose.model<IArticle>("Article", articleSchema);
 export default Article;

@@ -1,8 +1,12 @@
 import winston from "winston";
 import path from "path";
 import fs from "fs";
+import { fileURLToPath } from "url";
 
-const __dirname = path.resolve();
+// ESM-compatible __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const logDir = path.join(__dirname, "../../logs");
 
 // Auto-create logs directory
