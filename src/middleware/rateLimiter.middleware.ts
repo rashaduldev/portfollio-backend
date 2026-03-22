@@ -1,14 +1,13 @@
-// src/middleware/rateLimiter.middleware.ts
-import * as RateLimit from "express-rate-limit";
+// 1. Use the standard default import
+import rateLimit from "express-rate-limit";
 
-// Force TypeScript to treat the default export as callable
-const rateLimit = (RateLimit.default ?? RateLimit) as unknown as (
-  options: Parameters<typeof RateLimit.default>[0],
-) => ReturnType<typeof RateLimit.default>;
+// 2. You no longer need the complex "const rateLimit = ..." workaround logic.
+// The library's types are now robust enough to handle this directly.
 
-// Auth limiter
+// --------- Limiters ---------
+
 export const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
+  windowMs: 15 * 60 * 1000, // 15 minutes
   max: 20,
   standardHeaders: true,
   legacyHeaders: false,
@@ -18,7 +17,6 @@ export const authLimiter = rateLimit({
   },
 });
 
-// Global limiter
 export const globalLimiter = rateLimit({
   windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS ?? 900_000),
   max: Number(process.env.RATE_LIMIT_MAX ?? 100),
@@ -30,9 +28,8 @@ export const globalLimiter = rateLimit({
   },
 });
 
-// Contact limiter
 export const contactLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000,
+  windowMs: 60 * 60 * 1000, // 1 hour
   max: 5,
   message: {
     success: false,
@@ -40,9 +37,8 @@ export const contactLimiter = rateLimit({
   },
 });
 
-// Subscribe limiter
 export const subscribeLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000,
+  windowMs: 60 * 60 * 1000, // 1 hour
   max: 10,
   message: {
     success: false,
