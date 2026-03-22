@@ -1,7 +1,6 @@
 import "dotenv/config";
 import type { Response, Request } from "express";
 import express, { type Application } from "express";
-import * as helmet from "helmet";
 import cors from "cors";
 import morgan from "morgan";
 import compression from "compression";
@@ -24,16 +23,8 @@ import uploadRoutes from "./routes/upload.routes.js";
 
 const app: Application = express();
 
-// ─── Security ────────────────────────────────────────────────────────────────
-app.use(helmet.default());
+// ─── Security Middleware (Helmet removed) ─────────────────────────────────────
 app.use(mongoSanitize());
-
-// Optional: additional security headers in production
-if (process.env.NODE_ENV === "production") {
-  app.set("trust proxy", 1); // if behind a proxy like Vercel
-  app.use(helmet.hsts({ maxAge: 63072000, includeSubDomains: true }));
-  app.use(helmet.frameguard({ action: "deny" }));
-}
 
 // ─── CORS ─────────────────────────────────────────────────────────────────────
 const allowedOrigins = (process.env.ALLOWED_ORIGINS ?? "")
