@@ -20,6 +20,7 @@ import messageRoutes from "./routes/message.routes.js";
 import subscriberRoutes from "./routes/subscriber.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
 import uploadRoutes from "./routes/upload.routes.js";
+import mongoose from "mongoose";
 
 const app: Application = express();
 
@@ -88,6 +89,21 @@ app.get("/health", (_req, res) => {
     environment: process.env.NODE_ENV,
     timestamp: new Date().toISOString(),
   });
+});
+app.get("/health/db", async (_req: Request, res: Response) => {
+  try {
+    const isConnected = mongoose.connection.readyState === 1;
+
+    res.status(isConnected ? 200 : 500).json({
+      success: isConnected,
+      message: isConnected ? "Database connected" : "Database not connected",
+    });
+  } catch {
+    res.status(500).json({
+      success: false,
+      message: "Database health check failed",
+    });
+  }
 });
 
 // ─── API Routes ───────────────────────────────────────────────────────────────
