@@ -1,7 +1,7 @@
 import "dotenv/config";
 import type { Response, Request } from "express";
 import express, { type Application } from "express";
-import helmet from "helmet";
+import * as helmet from "helmet";
 import cors from "cors";
 import morgan from "morgan";
 import compression from "compression";
@@ -25,7 +25,7 @@ import uploadRoutes from "./routes/upload.routes.js";
 const app: Application = express();
 
 // ─── Security ────────────────────────────────────────────────────────────────
-app.use(helmet());
+app.use(helmet.default());
 app.use(mongoSanitize());
 
 // Optional: additional security headers in production
