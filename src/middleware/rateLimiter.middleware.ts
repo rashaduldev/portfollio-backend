@@ -1,7 +1,12 @@
-import rateLimit from "express-rate-limit";
+import * as RateLimit from "express-rate-limit";
 
+const rateLimit = RateLimit.default as unknown as (
+  options: Parameters<typeof RateLimit.default>[0],
+) => ReturnType<typeof RateLimit.default>;
+
+// Now you can use `rateLimit(...)` safely
 export const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 15 * 60 * 1000,
   max: 20,
   standardHeaders: true,
   legacyHeaders: false,
@@ -23,7 +28,7 @@ export const globalLimiter = rateLimit({
 });
 
 export const contactLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
+  windowMs: 60 * 60 * 1000,
   max: 5,
   message: {
     success: false,
@@ -32,7 +37,7 @@ export const contactLimiter = rateLimit({
 });
 
 export const subscribeLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
+  windowMs: 60 * 60 * 1000,
   max: 10,
   message: {
     success: false,
