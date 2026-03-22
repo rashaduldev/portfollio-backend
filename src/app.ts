@@ -24,9 +24,17 @@ import uploadRoutes from "./routes/upload.routes.js";
 
 const app: Application = express();
 
-// ─── Security ─────────────────────────────────────────────────────────────────
+// ─── Security ────────────────────────────────────────────────────────────────
+// Use Helmet safely with TypeScript for v8+
 app.use(helmet.default());
 app.use(mongoSanitize());
+
+// Optional: additional security headers in production
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", 1); // if behind a proxy like Vercel
+  app.use(helmet.hsts({ maxAge: 63072000, includeSubDomains: true }));
+  app.use(helmet.frameguard({ action: "deny" }));
+}
 
 // ─── CORS ─────────────────────────────────────────────────────────────────────
 const allowedOrigins = (process.env.ALLOWED_ORIGINS ?? "")
@@ -46,22 +54,22 @@ app.use(
   }),
 );
 
-// ─── Global rate limiter ──────────────────────────────────────────────────────
+// ─── Rate Limiter ─────────────────────────────────────────────────────────────
 app.use("/api", globalLimiter);
 
-// ─── Body parsing ─────────────────────────────────────────────────────────────
+// ─── Body Parsing ────────────────────────────────────────────────────────────
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cookieParser());
 app.use(compression());
 
-// ─── Logging ──────────────────────────────────────────────────────────────────
+// ─── Logging ─────────────────────────────────────────────────────────────────
 app.use(morgan("combined", { stream: morganStream }));
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
-// ─── Swagger docs ─────────────────────────────────────────────────────────────
+// ─── Swagger Docs ─────────────────────────────────────────────────────────────
 app.use(
   "/api-docs",
   swaggerUi.serve,
@@ -71,6 +79,7 @@ app.use(
   }),
 );
 
+// ─── Health & Root ───────────────────────────────────────────────────────────
 app.get("/", (_req: Request, res: Response) => {
   res.status(200).json({
     success: true,
@@ -78,7 +87,6 @@ app.get("/", (_req: Request, res: Response) => {
   });
 });
 
-// ─── Health check ─────────────────────────────────────────────────────────────
 app.get("/health", (_req, res) => {
   res.status(200).json({
     success: true,
@@ -88,9 +96,8 @@ app.get("/health", (_req, res) => {
   });
 });
 
-// ─── Routes ───────────────────────────────────────────────────────────────────
+// ─── API Routes ───────────────────────────────────────────────────────────────
 const API = "/api";
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(`${API}/auth`, authRoutes);
 app.use(`${API}/users`, userRoutes);
 app.use(`${API}/projects`, projectRoutes);
@@ -100,7 +107,7 @@ app.use(`${API}/subscribers`, subscriberRoutes);
 app.use(`${API}/dashboard`, dashboardRoutes);
 app.use(`${API}/upload`, uploadRoutes);
 
-// ─── Error handling ───────────────────────────────────────────────────────────
+// ─── Error Handling ──────────────────────────────────────────────────────────
 app.use(notFound);
 app.use(errorHandler);
 
