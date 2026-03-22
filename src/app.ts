@@ -1,7 +1,6 @@
 import "dotenv/config";
 import type { Response, Request } from "express";
 import express, { type Application } from "express";
-import * as helmet from "helmet";
 import cors from "cors";
 import morgan from "morgan";
 import compression from "compression";
@@ -21,12 +20,13 @@ import messageRoutes from "./routes/message.routes.js";
 import subscriberRoutes from "./routes/subscriber.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
 import uploadRoutes from "./routes/upload.routes.js";
+import helmet from "helmet";
 
 const app: Application = express();
 
 // ─── Security ────────────────────────────────────────────────────────────────
 // Use Helmet safely with TypeScript for v8+
-app.use(helmet.default());
+app.use(helmet());
 app.use(mongoSanitize());
 
 // Optional: additional security headers in production
