@@ -1,58 +1,40 @@
 import winston from "winston";
-import path from "path";
-import fs from "fs";
-import { fileURLToPath } from "url";
-
-// ESM-compatible __dirname
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const logDir = path.join(__dirname, "../../logs");
-
-// Auto-create logs directory
-if (!fs.existsSync(logDir)) {
-  fs.mkdirSync(logDir, { recursive: true });
-}
 
 const { combine, timestamp, printf, colorize, errors } = winston.format;
 
+// 1. Define the format
 const logFormat = printf(({ level, message, timestamp: ts, stack }) => {
   return `${ts} [${level}]: ${stack ?? message}`;
 });
 
+// 2. Check if we are running on Vercel/Production
+const isProduction = process.env.NODE_ENV === "production";
+
 const logger = winston.createLogger({
-  level: process.env.NODE_ENV === "production" ? "warn" : "debug",
+  level: isProduction ? "warn" : "debug",
   format: combine(
     timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
     errors({ stack: true }),
     logFormat,
   ),
   transports: [
+    // ALWAYS include Console for Vercel/Local debugging
     new winston.transports.Console({
       format: combine(colorize(), timestamp({ format: "HH:mm:ss" }), logFormat),
-    }),
-    new winston.transports.File({
-      filename: path.join(logDir, "error.log"),
-      level: "error",
-      maxsize: 5_242_880,
-      maxFiles: 5,
-    }),
-    new winston.transports.File({
-      filename: path.join(logDir, "combined.log"),
-      maxsize: 5_242_880,
-      maxFiles: 10,
-    }),
-  ],
-  exceptionHandlers: [
-    new winston.transports.File({
-      filename: path.join(logDir, "exceptions.log"),
     }),
   ],
 });
 
+/**
+ * CRITICAL: We removed the fs.mkdirSync and winston.transports.File.
+ * Serverless environments (Vercel) do not support local file writing.
+ * Your logs will still appear in the Vercel "Logs" tab.
+ */
+
 export const morganStream = {
   write: (message: string): void => {
-    logger.http(message.trim());
+    // Morgan uses 'http' level, so we make sure the logger handles it
+    logger.info(message.trim());
   },
 };
 
