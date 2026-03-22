@@ -20,23 +20,34 @@ import messageRoutes from "./routes/message.routes.js";
 import subscriberRoutes from "./routes/subscriber.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
 import uploadRoutes from "./routes/upload.routes.js";
-import helmet from "helmet";
+
+import helmet from "helmet"; // ✅ correct import for Helmet v8
 
 const app: Application = express();
 
-// ─── Security ────────────────────────────────────────────────────────────────
-// Use Helmet safely with TypeScript for v8+
+// ─── Security ───────────────────────────────────────────────────────────────
 app.use(helmet());
 app.use(mongoSanitize());
 
-// Optional: additional security headers in production
 if (process.env.NODE_ENV === "production") {
-  app.set("trust proxy", 1); // if behind a proxy like Vercel
-  app.use(helmet.hsts({ maxAge: 63072000, includeSubDomains: true }));
-  app.use(helmet.frameguard({ action: "deny" }));
+  app.set("trust proxy", 1); // if behind proxy like Vercel
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          imgSrc: ["'self'", "data:"],
+        },
+      },
+      frameguard: { action: "deny" },
+      hsts: { maxAge: 63072000, includeSubDomains: true },
+    }),
+  );
 }
 
-// ─── CORS ─────────────────────────────────────────────────────────────────────
+// ─── CORS ───────────────────────────────────────────────────────────────────
 const allowedOrigins = (process.env.ALLOWED_ORIGINS ?? "")
   .split(",")
   .filter(Boolean);
@@ -54,22 +65,22 @@ app.use(
   }),
 );
 
-// ─── Rate Limiter ─────────────────────────────────────────────────────────────
+// ─── Rate Limiter ───────────────────────────────────────────────────────────
 app.use("/api", globalLimiter);
 
-// ─── Body Parsing ────────────────────────────────────────────────────────────
+// ─── Body Parsing ──────────────────────────────────────────────────────────
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cookieParser());
 app.use(compression());
 
-// ─── Logging ─────────────────────────────────────────────────────────────────
+// ─── Logging ───────────────────────────────────────────────────────────────
 app.use(morgan("combined", { stream: morganStream }));
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
-// ─── Swagger Docs ─────────────────────────────────────────────────────────────
+// ─── Swagger Docs ──────────────────────────────────────────────────────────
 app.use(
   "/api-docs",
   swaggerUi.serve,
@@ -79,7 +90,7 @@ app.use(
   }),
 );
 
-// ─── Health & Root ───────────────────────────────────────────────────────────
+// ─── Health & Root ─────────────────────────────────────────────────────────
 app.get("/", (_req: Request, res: Response) => {
   res.status(200).json({
     success: true,
@@ -96,7 +107,7 @@ app.get("/health", (_req, res) => {
   });
 });
 
-// ─── API Routes ───────────────────────────────────────────────────────────────
+// ─── API Routes ────────────────────────────────────────────────────────────
 const API = "/api";
 app.use(`${API}/auth`, authRoutes);
 app.use(`${API}/users`, userRoutes);
@@ -107,7 +118,7 @@ app.use(`${API}/subscribers`, subscriberRoutes);
 app.use(`${API}/dashboard`, dashboardRoutes);
 app.use(`${API}/upload`, uploadRoutes);
 
-// ─── Error Handling ──────────────────────────────────────────────────────────
+// ─── Error Handling ────────────────────────────────────────────────────────
 app.use(notFound);
 app.use(errorHandler);
 
