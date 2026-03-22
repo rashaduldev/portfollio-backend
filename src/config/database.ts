@@ -1,30 +1,43 @@
 import mongoose from "mongoose";
 import logger from "./logger.js";
 
-const connectDB = async (): Promise<void> => {
-  const uri = process.env.MONGODB_URI;
+const MONGODB_URI = process.env.MONGODB_URI as string;
 
-  if (!uri)
-    throw new Error("MONGODB_URI is not defined in environment variables");
+if (!MONGODB_URI) {
+  throw new Error("MONGODB_URI is not defined");
+}
+
+// 👇 global cache (VERY IMPORTANT)
+let cached = (global as any).mongoose || {
+  conn: null,
+  promise: null,
+};
+
+const connectDB = async () => {
+  if (cached.conn) {
+    return cached.conn;
+  }
+
+  if (!cached.promise) {
+    cached.promise = mongoose.connect(MONGODB_URI, {
+      autoIndex: process.env.NODE_ENV !== "production",
+      bufferCommands: false, // 🔥 prevents buffering timeout
+    });
+  }
 
   try {
-    const conn = await mongoose.connect(uri, {
-      autoIndex: process.env.NODE_ENV !== "production",
-      connectTimeoutMS: 10000,
-    });
-    logger.info(`✅ MongoDB connected: ${conn.connection.host}`);
+    cached.conn = await cached.promise;
+    logger.info(`✅ MongoDB connected: ${cached.conn.connection.host}`);
   } catch (error) {
+    cached.promise = null;
     logger.error("MongoDB connection error:", error);
     throw error;
   }
 
-  mongoose.connection.on("disconnected", () => {
-    logger.warn("MongoDB disconnected. Attempting to reconnect...");
-  });
-
-  mongoose.connection.on("reconnected", () => {
-    logger.info("MongoDB reconnected.");
-  });
+  return cached.conn;
 };
+
+// save cache globally
+(global as any).mongoose = cached;
 
 export default connectDB;

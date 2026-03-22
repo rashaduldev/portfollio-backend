@@ -4,10 +4,9 @@ const options: swaggerJsdoc.Options = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "Portfolio Backend API",
+      title: "Rashaduldev Portfolio Backend API",
       version: "1.0.0",
-      description:
-        "Production-ready portfolio backend API — TypeScript edition.",
+      description: "portfolio backend API — TypeScript edition.",
       contact: { name: "API Support", email: "support@portfolio.com" },
       license: { name: "MIT" },
     },
