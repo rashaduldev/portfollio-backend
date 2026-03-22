@@ -23,7 +23,7 @@ app.use(mongoSanitize()); // sanitize user input
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // ─── Routes ────────────────────────────────────────────────────────────────
-app.get("/", (req: Request, res: Response) => {
+app.get("/", (_req: Request, res: Response) => {
   res.send("Hello World");
 });
 
@@ -36,9 +36,7 @@ app.use((req: Request, res: Response) => {
 });
 
 // ─── Server Start ──────────────────────────────────────────────────────────
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {});
 
 export default app;
