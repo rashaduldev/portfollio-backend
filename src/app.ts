@@ -20,14 +20,12 @@ import messageRoutes from "./routes/message.routes.js";
 import subscriberRoutes from "./routes/subscriber.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
 import uploadRoutes from "./routes/upload.routes.js";
-import * as helmetImport from "helmet";
-const helmet = helmetImport.default;
+import helmet from "helmet";
 
-// import helmet from "helmet";
 const app: Application = express();
 
 // ─── Security ───────────────────────────────────────────────────────────────
-app.use(helmet());
+app.use((helmet as any)());
 app.use(mongoSanitize());
 
 if (process.env.NODE_ENV === "production") {
