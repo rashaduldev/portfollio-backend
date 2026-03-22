@@ -1,10 +1,5 @@
 // src/middleware/rateLimiter.middleware.ts
-import * as RateLimit from "express-rate-limit";
-
-// Tell TS that the default export is callable
-const rateLimit = RateLimit.default as unknown as (
-  options: Parameters<typeof RateLimit.default>[0],
-) => ReturnType<typeof RateLimit.default>;
+import rateLimit from "express-rate-limit";
 
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
