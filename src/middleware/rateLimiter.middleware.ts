@@ -1,7 +1,7 @@
-import * as rateLimit from "express-rate-limit";
+import rateLimit from "express-rate-limit";
 
-export const authLimiter = rateLimit.default({
-  windowMs: 15 * 60 * 1000,
+export const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
   max: 20,
   standardHeaders: true,
   legacyHeaders: false,
@@ -11,9 +11,9 @@ export const authLimiter = rateLimit.default({
   },
 });
 
-export const globalLimiter = rateLimit.default({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS ?? "900000", 10),
-  max: parseInt(process.env.RATE_LIMIT_MAX ?? "100", 10),
+export const globalLimiter = rateLimit({
+  windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS ?? 900_000),
+  max: Number(process.env.RATE_LIMIT_MAX ?? 100),
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -22,8 +22,8 @@ export const globalLimiter = rateLimit.default({
   },
 });
 
-export const contactLimiter = rateLimit.default({
-  windowMs: 60 * 60 * 1000,
+export const contactLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
   max: 5,
   message: {
     success: false,
@@ -31,8 +31,8 @@ export const contactLimiter = rateLimit.default({
   },
 });
 
-export const subscribeLimiter = rateLimit.default({
-  windowMs: 60 * 60 * 1000,
+export const subscribeLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
   max: 10,
   message: {
     success: false,
