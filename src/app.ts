@@ -21,6 +21,7 @@ import subscriberRoutes from "./routes/subscriber.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
 import uploadRoutes from "./routes/upload.routes.js";
 import mongoose from "mongoose";
+import connectDB from "./config/database.js";
 
 const app: Application = express();
 
@@ -90,15 +91,20 @@ app.get("/health", (_req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
+
 app.get("/health/db", async (_req: Request, res: Response) => {
   try {
+    const conn = await connectDB();
     const isConnected = mongoose.connection.readyState === 1;
 
     res.status(isConnected ? 200 : 500).json({
       success: isConnected,
-      message: isConnected ? "Database connected" : "Database not connected",
+      message: isConnected
+        ? `Database connected: ${conn.connection.host}`
+        : "Database not connected, check first",
     });
-  } catch {
+  } catch (error) {
+    console.error("DB Health Error:", error);
     res.status(500).json({
       success: false,
       message: "Database health check failed",

@@ -13,7 +13,7 @@ import {
   subscribeSchema,
   paginationSchema,
 } from "../validators/index.validator.js";
-import { subscribeLimiter } from "../middleware/rateLimiter.middleware.js";
+// import { subscribeLimiter } from "../middleware/rateLimiter.middleware.js";
 
 const router: Router = express.Router();
 
@@ -45,7 +45,8 @@ const router: Router = express.Router();
  *       201: { description: Subscribed }
  *       409: { description: Already subscribed }
  */
-router.post("/", subscribeLimiter, validate(subscribeSchema), subscribe);
+// router.post("/", subscribeLimiter, validate(subscribeSchema), subscribe);
+router.post("/", validate(subscribeSchema), subscribe);
 
 /**
  * @swagger
