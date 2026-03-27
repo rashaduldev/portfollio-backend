@@ -7,7 +7,7 @@ import type { IMessage } from "../types/index.js";
 // ─── Create a new message ─────────────────────────────────────────────────────
 export const createMessage = catchAsync(async (req: Request, res: Response) => {
   const message = await messageService.createMessage(
-    req.body as Pick<IMessage, "name" | "email" | "subject" | "body">,
+    req.body as Pick<IMessage, "name" | "email" | "phone" | "message">,
     req,
   );
   sendSuccess(res, {

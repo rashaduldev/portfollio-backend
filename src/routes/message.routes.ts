@@ -39,12 +39,12 @@ const router: Router = express.Router();
  *         application/json:
  *           schema:
  *             type: object
- *             required: [name, email, subject, body]
+ *             required: [name, email, phone, message]
  *             properties:
  *               name:    { type: string }
  *               email:   { type: string }
- *               subject: { type: string }
- *               body:    { type: string }
+ *               phone:   { type: string }
+ *               message: { type: string }
  *     responses:
  *       201: { description: Message sent }
  *       429: { description: Rate limit exceeded }

@@ -59,7 +59,7 @@ export const emailTemplates = {
   }),
 
   contactNotification: (
-    message: Pick<IMessage, "name" | "email" | "subject" | "body">,
+    message: Pick<IMessage, "name" | "email" | "phone" | "message">,
   ): EmailTemplate => ({
     subject: `New Contact Message from ${message.name}`,
     html: `
@@ -68,8 +68,8 @@ export const emailTemplates = {
         <table style="width:100%;border-collapse:collapse">
           <tr><td style="padding:8px;font-weight:bold;width:120px">From:</td><td>${message.name}</td></tr>
           <tr><td style="padding:8px;font-weight:bold">Email:</td><td>${message.email}</td></tr>
-          <tr><td style="padding:8px;font-weight:bold">Subject:</td><td>${message.subject}</td></tr>
-          <tr><td style="padding:8px;font-weight:bold;vertical-align:top">Message:</td><td>${message.body}</td></tr>
+          <tr><td style="padding:8px;font-weight:bold">Subject:</td><td>${message.phone}</td></tr>
+          <tr><td style="padding:8px;font-weight:bold;vertical-align:top">Message:</td><td>${message.message}</td></tr>
         </table>
       </div>`,
   }),

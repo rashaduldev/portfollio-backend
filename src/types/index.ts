@@ -1,13 +1,21 @@
-import type { Request, Response, NextFunction } from 'express';
-import type { Document, Types } from 'mongoose';
+import type { Request, Response, NextFunction } from "express";
+import type { Document, Types } from "mongoose";
 
 // ─── Re-exports for convenience ───────────────────────────────────────────────
 export type { Request, Response, NextFunction };
-export type AsyncHandler = (req: Request, res: Response, next: NextFunction) => Promise<void>;
-export type SyncHandler  = (req: Request, res: Response, next: NextFunction) => void;
+export type AsyncHandler = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => Promise<void>;
+export type SyncHandler = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => void;
 
 // ─── User ─────────────────────────────────────────────────────────────────────
-export type UserRole = 'user' | 'admin';
+export type UserRole = "user" | "admin";
 
 export interface IUser extends Document {
   _id: Types.ObjectId;
@@ -87,8 +95,8 @@ export interface IProject extends Document {
 }
 
 // ─── Article ──────────────────────────────────────────────────────────────────
-export type ArticleStatus = 'draft' | 'published' | 'archived';
-export type ContentType   = 'markdown' | 'html' | 'richtext';
+export type ArticleStatus = "draft" | "published" | "archived";
+export type ContentType = "markdown" | "html" | "richtext";
 
 export interface IArticle extends Document {
   _id: Types.ObjectId;
@@ -117,8 +125,8 @@ export interface IMessage extends Document {
   _id: Types.ObjectId;
   name: string;
   email: string;
-  subject: string;
-  body: string;
+  phone: string;
+  message: string;
   isRead: boolean;
   isReplied: boolean;
   ipAddress?: string;
