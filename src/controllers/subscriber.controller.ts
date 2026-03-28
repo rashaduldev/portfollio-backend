@@ -32,6 +32,22 @@ export const getSubscribers = catchAsync(
   },
 );
 
+// ─── Send newsletter to all subscribers ─────────────────────────────
+export const sendNewsletter = catchAsync(
+  async (req: Request, res: Response) => {
+    const { subject, content } = req.body as {
+      subject: string;
+      content: string;
+    };
+
+    const result = await subscriberService.sendNewsletter(subject, content);
+
+    sendSuccess(res, {
+      message: `Newsletter sent to ${result.count} subscribers`,
+    });
+  },
+);
+
 // ─── Delete subscriber by ID ───────────────────────────────────────────────
 export const deleteSubscriber = catchAsync(
   async (req: Request, res: Response) => {

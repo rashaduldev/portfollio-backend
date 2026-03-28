@@ -6,6 +6,7 @@ import {
   getSubscribers,
   deleteSubscriber,
   getSubscriberStats,
+  sendNewsletter,
 } from "../controllers/subscriber.controller.js";
 import { protect, restrictTo } from "../middleware/auth.middleware.js";
 import { validate } from "../middleware/validate.middleware.js";
@@ -89,6 +90,27 @@ router.use(protect, restrictTo("admin"));
  *       200: { description: Subscribers list }
  */
 router.get("/", validate(paginationSchema, "query"), getSubscribers);
+
+/**
+ * @swagger
+ * /api/subscribers/send-newsletter:
+ *   post:
+ *     summary: Send newsletter to all subscribers (admin)
+ *     tags: [Subscribers]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [subject, content]
+ *             properties:
+ *               subject: { type: string }
+ *               content: { type: string }
+ *     responses:
+ *       200: { description: Newsletter sent }
+ */
+router.post("/send-newsletter", sendNewsletter);
 
 /**
  * @swagger
