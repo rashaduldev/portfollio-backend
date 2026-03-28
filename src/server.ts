@@ -3,12 +3,13 @@ import http from "http";
 import connectDB from "./config/database.js";
 import app from "./app.js";
 import logger from "./config/logger.js";
+import { seedAdmin } from "./seedAdmin.js";
 
 const PORT = parseInt(process.env.PORT ?? "5000", 10);
 
 const start = async (): Promise<void> => {
   await connectDB();
-
+  await seedAdmin();
   const server = http.createServer(app);
 
   server.listen(PORT, () => {
