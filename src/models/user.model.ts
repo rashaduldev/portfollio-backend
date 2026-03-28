@@ -20,6 +20,13 @@ const userSchema = new Schema<IUser>(
       trim: true,
       match: [/^\S+@\S+\.\S+$/, "Please provide a valid email"],
     },
+    phone: {
+      type: String,
+      required: [true, "Phone is required"],
+      trim: true,
+      minlength: [2, "Name must be at least 2 characters"],
+      maxlength: [20, "Name cannot exceed 20 characters"],
+    },
     password: {
       type: String,
       required: [true, "Password is required"],

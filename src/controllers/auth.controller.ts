@@ -13,6 +13,7 @@ export const register = catchAsync(async (req: Request, res: Response) => {
     req.body as {
       name: string;
       email: string;
+      phone: string;
       password: string;
       role?: "user" | "admin";
     },

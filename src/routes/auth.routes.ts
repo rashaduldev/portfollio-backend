@@ -47,6 +47,7 @@ const router: Router = express.Router();
  *             properties:
  *               name:            { type: string, example: "Jane Doe" }
  *               email:           { type: string, example: "jane@example.com" }
+ *               phone:           { type: string, example: "515186565" }
  *               password:        { type: string, example: "Secret123" }
  *               confirmPassword: { type: string, example: "Secret123" }
  *     responses:
