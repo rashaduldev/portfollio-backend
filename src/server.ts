@@ -5,7 +5,6 @@ import app from "./app.js";
 import logger from "./config/logger.js";
 
 const PORT = parseInt(process.env.PORT ?? "5000", 10);
-console.log("MONGO_URI:", process.env.MONGODB_URI);
 
 const start = async (): Promise<void> => {
   await connectDB();

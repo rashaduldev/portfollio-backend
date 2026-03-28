@@ -1,5 +1,5 @@
 import "dotenv/config";
-import type { Response, Request } from "express";
+import type { Response, Request, NextFunction } from "express";
 import express, { type Application } from "express";
 import cors from "cors";
 import morgan from "morgan";
@@ -83,7 +83,7 @@ app.get("/", (_req: Request, res: Response) => {
   });
 });
 
-app.get("/health", (_req, res) => {
+app.get("/health", (_req: Request, res: Response) => {
   res.status(200).json({
     success: true,
     message: "Server is healthy",
@@ -104,11 +104,21 @@ app.get("/health/db", async (_req: Request, res: Response) => {
         : "Database not connected, check first",
     });
   } catch (error) {
-    console.error("DB Health Error:", error);
     res.status(500).json({
       success: false,
       message: "Database health check failed",
+      error,
     });
+  }
+});
+
+// ─── Ensure DB Connection for all API routes ───
+app.use("/api", async (_req: Request, _res: Response, next: NextFunction) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    next(error);
   }
 });
 

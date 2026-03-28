@@ -21,7 +21,7 @@ const connectDB = async () => {
   if (!cached.promise) {
     cached.promise = mongoose.connect(MONGODB_URI, {
       autoIndex: process.env.NODE_ENV !== "production",
-      bufferCommands: false, // 🔥 prevents buffering timeout
+      bufferCommands: true,
     });
   }
 
