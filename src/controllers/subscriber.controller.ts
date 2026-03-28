@@ -44,6 +44,7 @@ export const sendNewsletter = catchAsync(
 
     sendSuccess(res, {
       message: `Newsletter sent to ${result.count} subscribers`,
+      data: result.details,
     });
   },
 );

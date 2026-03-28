@@ -46,17 +46,29 @@ export const subscriberService = {
   async sendNewsletter(
     subject: string,
     content: string,
-  ): Promise<{ count: number }> {
-    if (!subject || !content) {
+  ): Promise<{
+    count: number;
+    details: {
+      email: string;
+      html: string;
+      status: "sent" | "failed";
+      error?: string;
+    }[];
+  }> {
+    if (!subject || !content)
       throw new Error("Subject and content are required");
-    }
 
-    // only active subscribers
+    // get only active subscribers
     const subscribers = await Subscriber.find({ isActive: true });
 
-    if (!subscribers.length) {
-      return { count: 0 };
-    }
+    if (!subscribers.length) return { count: 0, details: [] };
+
+    const details: {
+      email: string;
+      html: string;
+      status: "sent" | "failed";
+      error?: string;
+    }[] = [];
 
     const batchSize = 100;
 
@@ -64,29 +76,30 @@ export const subscriberService = {
       const batch = subscribers.slice(i, i + batchSize);
 
       await Promise.all(
-        batch.map((sub) => {
+        batch.map(async (sub) => {
           const unsubscribeUrl = `${process.env.CLIENT_URL}/unsubscribe/${sub.unsubscribeToken}`;
-
           const html = `
           ${content}
           <br/><br/>
-          <a href="${unsubscribeUrl}" style="color:red;">
-            Unsubscribe
-          </a>
+          <a href="${unsubscribeUrl}" style="color:red;">Unsubscribe</a>
         `;
-
-          return sendEmail({
-            to: sub.email,
-            subject,
-            html,
-          }).catch((err: unknown) => {
+          try {
+            await sendEmail({ to: sub.email, subject, html });
+            details.push({ email: sub.email, html, status: "sent" });
+          } catch (err: any) {
+            details.push({
+              email: sub.email,
+              html,
+              status: "failed",
+              error: err.message,
+            });
             logger.error(`Failed to send email to ${sub.email}`, err);
-          });
+          }
         }),
       );
     }
 
-    return { count: subscribers.length };
+    return { count: subscribers.length, details };
   },
 
   async unsubscribeByToken(token: string): Promise<void> {
