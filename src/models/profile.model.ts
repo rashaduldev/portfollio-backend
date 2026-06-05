@@ -8,7 +8,13 @@ const profileSchema = new Schema<IProfile>(
     headline: { type: String, maxlength: 200, trim: true },
     location: { type: String, maxlength: 100 },
     website:  { type: String, trim: true },
-    skills:   [{ type: String, trim: true }],
+    skills: [
+      {
+        name:     { type: String, required: true, trim: true },
+        category: { type: String, trim: true, default: 'Other' },
+        level:    { type: Number, min: 0, max: 100, default: 0 },
+      },
+    ],
     avatar: {
       url:      String,
       publicId: String,

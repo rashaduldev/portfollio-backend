@@ -54,6 +54,12 @@ export interface ISocialLinks {
   hashnode?: string;
 }
 
+export interface ISkill {
+  name: string;
+  category?: string;
+  level?: number;
+}
+
 export interface IProfile extends Document {
   _id: Types.ObjectId;
   user: Types.ObjectId | IUser;
@@ -61,11 +67,57 @@ export interface IProfile extends Document {
   headline?: string;
   location?: string;
   website?: string;
-  skills: string[];
+  skills: ISkill[];
   avatar?: ICloudinaryFile;
   resume?: ICloudinaryFile;
   socialLinks?: ISocialLinks;
   isPublic: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// ─── Resume: Experience & Education ───────────────────────────────────────────
+export interface IExperience extends Document {
+  _id: Types.ObjectId;
+  user: Types.ObjectId | IUser;
+  role: string;
+  company: string;
+  location?: string;
+  startDate: Date;
+  endDate?: Date;
+  current: boolean;
+  description?: string;
+  order: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface IEducation extends Document {
+  _id: Types.ObjectId;
+  user: Types.ObjectId | IUser;
+  degree: string;
+  institution: string;
+  field?: string;
+  startDate: Date;
+  endDate?: Date;
+  current: boolean;
+  description?: string;
+  order: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// ─── Site Settings (SEO singleton) ────────────────────────────────────────────
+export interface ISettings extends Document {
+  _id: Types.ObjectId;
+  key: string;
+  siteName?: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  keywords: string[];
+  ogImage?: string;
+  enableSitemap: boolean;
+  googleAnalyticsId?: string;
   createdAt: Date;
   updatedAt: Date;
 }

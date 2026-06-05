@@ -20,6 +20,8 @@ import messageRoutes from "./routes/message.routes.js";
 import subscriberRoutes from "./routes/subscriber.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
 import uploadRoutes from "./routes/upload.routes.js";
+import resumeRoutes from "./routes/resume.routes.js";
+import settingsRoutes from "./routes/settings.routes.js";
 import mongoose from "mongoose";
 import connectDB from "./config/database.js";
 
@@ -132,6 +134,8 @@ app.use(`${API}/messages`, messageRoutes);
 app.use(`${API}/subscribers`, subscriberRoutes);
 app.use(`${API}/dashboard`, dashboardRoutes);
 app.use(`${API}/upload`, uploadRoutes);
+app.use(`${API}/resume`, resumeRoutes);
+app.use(`${API}/settings`, settingsRoutes);
 
 // ─── Error Handling ──────────────────────────────────────────────────────────
 app.use(notFound);

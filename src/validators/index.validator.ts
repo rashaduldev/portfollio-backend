@@ -6,7 +6,15 @@ export const updateProfileSchema = Joi.object({
   headline: Joi.string().max(200).allow("", null),
   location: Joi.string().max(100).allow("", null),
   website: Joi.string().uri().allow("", null),
-  skills: Joi.array().items(Joi.string().trim()).max(50),
+  skills: Joi.array()
+    .items(
+      Joi.object({
+        name: Joi.string().trim().required(),
+        category: Joi.string().trim().allow("", null),
+        level: Joi.number().min(0).max(100).default(0),
+      }),
+    )
+    .max(100),
   socialLinks: Joi.object({
     github: Joi.string().uri().allow("", null),
     linkedin: Joi.string().uri().allow("", null),
@@ -85,6 +93,51 @@ export const createMessageSchema = Joi.object({
 export const subscribeSchema = Joi.object({
   email: Joi.string().email().lowercase().required(),
   source: Joi.string().max(50).default("website"),
+});
+
+// ─── Resume: Experience ───────────────────────────────────────────────────────
+export const createExperienceSchema = Joi.object({
+  role: Joi.string().trim().max(200).required(),
+  company: Joi.string().trim().max(200).required(),
+  location: Joi.string().trim().max(150).allow("", null),
+  startDate: Joi.date().required(),
+  endDate: Joi.date().allow(null),
+  current: Joi.boolean().default(false),
+  description: Joi.string().max(3000).allow("", null),
+  order: Joi.number().integer().min(0).default(0),
+});
+
+export const updateExperienceSchema = createExperienceSchema.fork(
+  ["role", "company", "startDate"],
+  (s) => s.optional(),
+);
+
+// ─── Resume: Education ────────────────────────────────────────────────────────
+export const createEducationSchema = Joi.object({
+  degree: Joi.string().trim().max(200).required(),
+  institution: Joi.string().trim().max(200).required(),
+  field: Joi.string().trim().max(200).allow("", null),
+  startDate: Joi.date().required(),
+  endDate: Joi.date().allow(null),
+  current: Joi.boolean().default(false),
+  description: Joi.string().max(3000).allow("", null),
+  order: Joi.number().integer().min(0).default(0),
+});
+
+export const updateEducationSchema = createEducationSchema.fork(
+  ["degree", "institution", "startDate"],
+  (s) => s.optional(),
+);
+
+// ─── Site Settings (SEO) ──────────────────────────────────────────────────────
+export const updateSettingsSchema = Joi.object({
+  siteName: Joi.string().max(150).allow("", null),
+  metaTitle: Joi.string().max(120).allow("", null),
+  metaDescription: Joi.string().max(320).allow("", null),
+  keywords: Joi.array().items(Joi.string().trim()).max(50),
+  ogImage: Joi.string().uri().allow("", null),
+  enableSitemap: Joi.boolean(),
+  googleAnalyticsId: Joi.string().max(50).allow("", null),
 });
 
 // ─── Pagination / Filter (shared) ────────────────────────────────────────────

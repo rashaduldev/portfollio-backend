@@ -62,10 +62,18 @@ export const userService = {
   },
 
   async getMyProfile(userId: string): Promise<IProfile> {
-    const profile = await Profile.findOne({ user: userId }).populate(
+    let profile = await Profile.findOne({ user: userId }).populate(
       'user',
       'name email role lastLogin'
     );
+    // Auto-create an empty profile on first access so the dashboard always loads.
+    if (!profile) {
+      await Profile.create({ user: userId });
+      profile = await Profile.findOne({ user: userId }).populate(
+        'user',
+        'name email role lastLogin'
+      );
+    }
     if (!profile) throw new NotFoundError('Profile');
     return profile;
   },
