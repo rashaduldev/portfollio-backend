@@ -9,8 +9,8 @@
     "start": "node dist/server.js",
     "dev": "tsx watch src/server.ts",
     "lint": "eslint src/ --ext .ts",
-    "seed": "ts-node src/seed.ts",
-    "seed:destroy": "ts-node src/seed.ts -- --destroy",
+    "seed": "tsx src/seed.ts",
+    "seed:destroy": "tsx src/seed.ts --destroy",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

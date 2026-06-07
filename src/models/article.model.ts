@@ -2,12 +2,16 @@ import mongoose, { Schema } from "mongoose";
 import type { IArticle } from "../types/index.js";
 import * as slugifyPkg from "slugify";
 
-// ─── Fix TypeScript callable issue ──────────────────────────────────────────
-// Force TS to treat slugify as a function
-const slugify = slugifyPkg as unknown as (
+// ─── Fix ESM/CJS interop ────────────────────────────────────────────────────
+// Under ESM the callable lives on `.default`; fall back to the namespace itself
+// for builds where it is exported directly.
+type SlugifyFn = (
   input: string,
   options?: { lower?: boolean; strict?: boolean },
 ) => string;
+const slugify =
+  ((slugifyPkg as unknown as { default?: SlugifyFn }).default ??
+    (slugifyPkg as unknown as SlugifyFn)) as SlugifyFn;
 
 const articleSchema = new Schema<IArticle>(
   {

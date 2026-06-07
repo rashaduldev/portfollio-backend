@@ -95,16 +95,9 @@ export const errorHandler = (
   err.statusCode = err.statusCode || 500;
   err.status = err.status || "error";
 
-  // 1. DEVELOPMENT MODE
-  if (process.env.NODE_ENV === "development") {
-    logger.error(`${req.method} ${req.originalUrl} — ${err.message}`);
-    const appErr =
-      err instanceof AppError ? err : new AppError(err.message, err.statusCode);
-    sendErrorDev(appErr, res);
-    return;
-  }
-
-  // 2. PRODUCTION MODE
+  // Normalize known error types (JWT, validation, cast, duplicate, multer)
+  // BEFORE branching on environment so they map to the correct status code in
+  // both development and production (e.g. expired token → 401, not 500).
   let error = { ...err };
   error.message = err.message;
   error.name = err.name;
@@ -122,6 +115,14 @@ export const errorHandler = (
       : new AppError(error.message, error.statusCode);
 
   logger.error(`${req.method} ${req.originalUrl} — ${finalError.message}`);
+
+  // 1. DEVELOPMENT MODE — verbose payload (stack, etc.)
+  if (process.env.NODE_ENV === "development") {
+    sendErrorDev(finalError, res);
+    return;
+  }
+
+  // 2. PRODUCTION MODE — sanitized payload
   sendErrorProd(finalError, res);
 };
 
