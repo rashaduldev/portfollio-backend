@@ -166,6 +166,8 @@ export interface IArticle extends Document {
   publishedAt?: Date;
   readingTime?: number;
   views: number;
+  likes?: number;
+  comments?: { name: string; content: string; createdAt: Date }[];
   isFeatured: boolean;
   metaTitle?: string;
   metaDescription?: string;

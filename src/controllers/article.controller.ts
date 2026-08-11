@@ -82,3 +82,25 @@ export const getTaxonomy = catchAsync(async (_req: Request, res: Response) => {
   const taxonomy = await articleService.getTaxonomy();
   sendSuccess(res, { data: taxonomy });
 });
+
+// ─── Get comments for an article ───────────────────────────────────────────
+export const getComments = catchAsync(async (req: Request, res: Response) => {
+  const id = String(req.params.id);
+  const comments = await articleService.getComments(id);
+  sendSuccess(res, { data: comments });
+});
+
+// ─── Add comment to article (public) ───────────────────────────────────────
+export const addComment = catchAsync(async (req: Request, res: Response) => {
+  const id = String(req.params.id);
+  const { name, content } = req.body as { name: string; content: string };
+  const comments = await articleService.addComment(id, { name, content });
+  sendSuccess(res, { statusCode: 201, message: 'Comment added.', data: comments });
+});
+
+// ─── Like article (increments counter) ────────────────────────────────────
+export const likeArticle = catchAsync(async (req: Request, res: Response) => {
+  const id = String(req.params.id);
+  const likes = await articleService.likeArticle(id);
+  sendSuccess(res, { message: 'Article liked.', data: { likes } });
+});

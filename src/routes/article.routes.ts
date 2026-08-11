@@ -16,6 +16,9 @@ import { handleCoverImageUpload } from "../middleware/upload.middleware.js";
 import {
   createArticleSchema,
   updateArticleSchema,
+  getComments,
+  addComment,
+  likeArticle,
   paginationSchema,
 } from "../validators/index.validator.js";
 
@@ -34,6 +37,13 @@ const router: Router = express.Router();
  *   get:
  *     summary: Get all tags and categories
  *     tags: [Articles]
+
+/**
+ * Comments and interactions
+ */
+router.get("/id/:id/comments", getComments);
+router.post("/id/:id/comments", addComment);
+router.post("/id/:id/like", likeArticle);
  *     security: []
  *     responses:
  *       200: { description: Tags and categories }

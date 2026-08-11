@@ -154,4 +154,30 @@ export const articleService = {
       categories: (categories as string[]).filter(Boolean),
     };
   },
+
+  async addComment(articleId: string, data: { name: string; content: string }) {
+    const article = await Article.findById(articleId);
+    if (!article) throw new NotFoundError('Article');
+
+    article.comments = article.comments || [];
+    article.comments.push({ name: data.name, content: data.content, createdAt: new Date() } as any);
+    await article.save();
+    return article.comments;
+  },
+
+  async getComments(articleId: string) {
+    const article = await Article.findById(articleId).select('comments');
+    if (!article) throw new NotFoundError('Article');
+    return article.comments || [];
+  },
+
+  async likeArticle(articleId: string) {
+    const updated = await Article.findByIdAndUpdate(
+      articleId,
+      { $inc: { likes: 1 } },
+      { new: true }
+    ).select('likes');
+    if (!updated) throw new NotFoundError('Article');
+    return updated.likes;
+  },
 };
