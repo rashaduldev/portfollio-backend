@@ -7,6 +7,9 @@ import {
   updateProject,
   deleteProject,
   deleteProjectImage,
+  getComments,
+  addComment,
+  likeProject,
 } from "../controllers/project.controller.js";
 import { protect, optionalAuth } from "../middleware/auth.middleware.js";
 import { validate } from "../middleware/validate.middleware.js";
@@ -15,9 +18,14 @@ import {
   createProjectSchema,
   updateProjectSchema,
   paginationSchema,
+  createCommentSchema,
 } from "../validators/index.validator.js";
 
 const router: Router = express.Router();
+
+router.get("/:id/comments", getComments);
+router.post("/:id/comments", validate(createCommentSchema), addComment);
+router.post("/:id/like", likeProject);
 
 /**
  * @swagger

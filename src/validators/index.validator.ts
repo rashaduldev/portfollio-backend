@@ -138,6 +138,16 @@ export const updateSettingsSchema = Joi.object({
   ogImage: Joi.string().uri().allow("", null),
   enableSitemap: Joi.boolean(),
   googleAnalyticsId: Joi.string().max(50).allow("", null),
+  cookiePolicy: Joi.object({
+    title: Joi.string().max(150).allow("", null),
+    bannerImage: Joi.string().uri().allow("", null),
+    content: Joi.string().max(20000).allow("", null),
+  }),
+});
+
+export const createCommentSchema = Joi.object({
+  name: Joi.string().trim().min(2).max(100).required(),
+  content: Joi.string().trim().min(1).max(1000).required(),
 });
 
 // ─── Pagination / Filter (shared) ────────────────────────────────────────────

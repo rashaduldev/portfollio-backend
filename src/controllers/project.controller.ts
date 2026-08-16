@@ -21,6 +21,21 @@ export const getProjectById = catchAsync(
   },
 );
 
+export const getComments = catchAsync(async (req: Request, res: Response) => {
+  const comments = await projectService.getComments(String(req.params.id));
+  sendSuccess(res, { data: comments });
+});
+
+export const addComment = catchAsync(async (req: Request, res: Response) => {
+  const comments = await projectService.addComment(String(req.params.id), req.body);
+  sendSuccess(res, { statusCode: 201, message: 'Comment added.', data: comments });
+});
+
+export const likeProject = catchAsync(async (req: Request, res: Response) => {
+  const likes = await projectService.likeProject(String(req.params.id));
+  sendSuccess(res, { data: { likes } });
+});
+
 // ─── Create a new project ────────────────────────────────────────────────────
 export const createProject = catchAsync(async (req: Request, res: Response) => {
   const files = (req.files as Express.Multer.File[]) ?? [];

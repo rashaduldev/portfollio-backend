@@ -12,6 +12,12 @@ const settingsSchema = new Schema<ISettings>(
     ogImage:           { type: String, trim: true },
     enableSitemap:     { type: Boolean, default: true },
     googleAnalyticsId: { type: String, trim: true },
+    cookiePolicy: {
+      title: { type: String, trim: true, maxlength: 150 },
+      bannerImage: { type: String, trim: true },
+      content: { type: String, maxlength: 20000 },
+      updatedAt: { type: Date },
+    },
   },
   { timestamps: true }
 );

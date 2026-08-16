@@ -9,6 +9,9 @@ import {
   deleteArticle,
   getRelatedArticles,
   getTaxonomy,
+  getComments,
+  addComment,
+  likeArticle,
 } from "../controllers/article.controller.js";
 import { protect, optionalAuth } from "../middleware/auth.middleware.js";
 import { validate } from "../middleware/validate.middleware.js";
@@ -16,9 +19,7 @@ import { handleCoverImageUpload } from "../middleware/upload.middleware.js";
 import {
   createArticleSchema,
   updateArticleSchema,
-  getComments,
-  addComment,
-  likeArticle,
+  createCommentSchema,
   paginationSchema,
 } from "../validators/index.validator.js";
 
@@ -31,23 +32,9 @@ const router: Router = express.Router();
  *   description: Blog / articles management
  */
 
-/**
- * @swagger
- * /api/articles/taxonomy:
- *   get:
- *     summary: Get all tags and categories
- *     tags: [Articles]
-
-/**
- * Comments and interactions
- */
 router.get("/id/:id/comments", getComments);
-router.post("/id/:id/comments", addComment);
+router.post("/id/:id/comments", validate(createCommentSchema), addComment);
 router.post("/id/:id/like", likeArticle);
- *     security: []
- *     responses:
- *       200: { description: Tags and categories }
- */
 router.get("/taxonomy", getTaxonomy);
 
 /**

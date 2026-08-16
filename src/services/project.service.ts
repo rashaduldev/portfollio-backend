@@ -47,6 +47,26 @@ export const projectService = {
     return project;
   },
 
+  async getComments(id: string) {
+    const project = await Project.findById(id).select('comments');
+    if (!project) throw new NotFoundError('Project');
+    return project.comments || [];
+  },
+
+  async addComment(id: string, data: { name: string; content: string }) {
+    const project = await Project.findById(id);
+    if (!project) throw new NotFoundError('Project');
+    project.comments.push({ ...data, createdAt: new Date() });
+    await project.save();
+    return project.comments;
+  },
+
+  async likeProject(id: string) {
+    const project = await Project.findByIdAndUpdate(id, { $inc: { likes: 1 } }, { new: true }).select('likes');
+    if (!project) throw new NotFoundError('Project');
+    return project.likes;
+  },
+
   async createProject(
     userId: string,
     data: Partial<IProject>,

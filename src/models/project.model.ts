@@ -32,6 +32,14 @@ const projectSchema = new Schema<IProject>(
     isPublished:{ type: Boolean, default: true },
     order:      { type: Number, default: 0 },
     views:      { type: Number, default: 0 },
+    likes:      { type: Number, default: 0 },
+    comments: [
+      {
+        name: { type: String, required: true, trim: true },
+        content: { type: String, required: true, trim: true },
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
   },
   { timestamps: true }
 );

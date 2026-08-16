@@ -118,6 +118,12 @@ export interface ISettings extends Document {
   ogImage?: string;
   enableSitemap: boolean;
   googleAnalyticsId?: string;
+  cookiePolicy?: {
+    title?: string;
+    bannerImage?: string;
+    content?: string;
+    updatedAt?: Date;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -143,6 +149,8 @@ export interface IProject extends Document {
   isPublished: boolean;
   order: number;
   views: number;
+  likes: number;
+  comments: { name: string; content: string; createdAt: Date }[];
   createdAt: Date;
   updatedAt: Date;
 }
