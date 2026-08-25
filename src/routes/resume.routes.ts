@@ -10,7 +10,7 @@ import {
   updateEducation,
   deleteEducation,
 } from "../controllers/resume.controller.js";
-import { protect, restrictTo } from "../middleware/auth.middleware.js";
+import { protect, restrictTo, optionalAuth } from "../middleware/auth.middleware.js";
 import { validate } from "../middleware/validate.middleware.js";
 import {
   createExperienceSchema,
@@ -31,7 +31,7 @@ const router: Router = express.Router();
 // ─── Experience ────────────────────────────────────────────────────────────────
 router
   .route("/experience")
-  .get(getExperience)
+  .get(optionalAuth, getExperience)
   .post(
     protect,
     restrictTo("admin"),
@@ -52,7 +52,7 @@ router
 // ─── Education ─────────────────────────────────────────────────────────────────
 router
   .route("/education")
-  .get(getEducation)
+  .get(optionalAuth, getEducation)
   .post(
     protect,
     restrictTo("admin"),

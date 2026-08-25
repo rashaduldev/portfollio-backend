@@ -104,6 +104,7 @@ export const createExperienceSchema = Joi.object({
   endDate: Joi.date().allow(null),
   current: Joi.boolean().default(false),
   description: Joi.string().max(3000).allow("", null),
+  isActive: Joi.boolean().default(true),
   order: Joi.number().integer().min(0).default(0),
 });
 
@@ -121,6 +122,7 @@ export const createEducationSchema = Joi.object({
   endDate: Joi.date().allow(null),
   current: Joi.boolean().default(false),
   description: Joi.string().max(3000).allow("", null),
+  isActive: Joi.boolean().default(true),
   order: Joi.number().integer().min(0).default(0),
 });
 

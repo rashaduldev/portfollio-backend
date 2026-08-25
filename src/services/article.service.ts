@@ -35,7 +35,7 @@ export const articleService = {
 
     const [articles, total] = await Promise.all([
       Article.find(filter)
-        .select('-content')
+        .select(userRole === 'admin' ? '' : '-content')
         .sort(sort)
         .skip(skip)
         .limit(limit)

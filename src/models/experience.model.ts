@@ -21,6 +21,7 @@ const experienceSchema = new Schema<IExperience>(
     endDate:     { type: Date },
     current:     { type: Boolean, default: false },
     description: { type: String, maxlength: 3000 },
+    isActive:    { type: Boolean, default: true },
     order:       { type: Number, default: 0 },
   },
   { timestamps: true }

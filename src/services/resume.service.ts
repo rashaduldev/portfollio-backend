@@ -5,8 +5,8 @@ import type { IExperience, IEducation } from '../types/index.js';
 
 export const resumeService = {
   // ─── Experience ───────────────────────────────────────────────────────────
-  async listExperience(): Promise<IExperience[]> {
-    return Experience.find().sort({ order: 1, startDate: -1 });
+  async listExperience(includeInactive = false): Promise<IExperience[]> {
+    return Experience.find(includeInactive ? {} : { isActive: true }).sort({ order: 1, startDate: -1 });
   },
 
   async createExperience(
@@ -34,8 +34,8 @@ export const resumeService = {
   },
 
   // ─── Education ────────────────────────────────────────────────────────────
-  async listEducation(): Promise<IEducation[]> {
-    return Education.find().sort({ order: 1, startDate: -1 });
+  async listEducation(includeInactive = false): Promise<IEducation[]> {
+    return Education.find(includeInactive ? {} : { isActive: true }).sort({ order: 1, startDate: -1 });
   },
 
   async createEducation(

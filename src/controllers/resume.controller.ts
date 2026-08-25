@@ -4,8 +4,8 @@ import { catchAsync, sendSuccess } from "../utils/helpers.js";
 import type { IExperience, IEducation } from "../types/index.js";
 
 // ─── Experience ────────────────────────────────────────────────────────────────
-export const getExperience = catchAsync(async (_req: Request, res: Response) => {
-  const data = await resumeService.listExperience();
+export const getExperience = catchAsync(async (req: Request, res: Response) => {
+  const data = await resumeService.listExperience(req.user?.role === "admin");
   sendSuccess(res, { data });
 });
 
@@ -41,8 +41,8 @@ export const deleteExperience = catchAsync(
 );
 
 // ─── Education ─────────────────────────────────────────────────────────────────
-export const getEducation = catchAsync(async (_req: Request, res: Response) => {
-  const data = await resumeService.listEducation();
+export const getEducation = catchAsync(async (req: Request, res: Response) => {
+  const data = await resumeService.listEducation(req.user?.role === "admin");
   sendSuccess(res, { data });
 });
 

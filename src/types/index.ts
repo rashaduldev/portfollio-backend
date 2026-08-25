@@ -87,6 +87,7 @@ export interface IExperience extends Document {
   endDate?: Date;
   current: boolean;
   description?: string;
+  isActive: boolean;
   order: number;
   createdAt: Date;
   updatedAt: Date;
@@ -102,6 +103,7 @@ export interface IEducation extends Document {
   endDate?: Date;
   current: boolean;
   description?: string;
+  isActive: boolean;
   order: number;
   createdAt: Date;
   updatedAt: Date;
