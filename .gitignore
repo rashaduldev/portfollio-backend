@@ -6,9 +6,10 @@ dist/
 build/
 
 # Environment
-# .env
+.env
 .env.local
 .env.production
+!.env.example
 
 # Logs
 logs/
