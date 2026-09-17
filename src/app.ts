@@ -1,11 +1,11 @@
 import "dotenv/config";
 import type { Response, Request, NextFunction } from "express";
-import express, { type Application } from "express";
+import express, { type Application, type RequestHandler } from "express";
 import cors from "cors";
 import morgan from "morgan";
 import compression from "compression";
 import cookieParser from "cookie-parser";
-import helmet from "helmet";
+import helmet, { type HelmetOptions } from "helmet";
 import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./config/swagger.js";
 import { morganStream } from "./config/logger.js";
@@ -26,10 +26,13 @@ import mongoose from "mongoose";
 import connectDB from "./config/database.js";
 
 const app: Application = express();
+const helmetMiddleware = helmet as unknown as (
+  options?: Readonly<HelmetOptions>,
+) => RequestHandler;
 
 // ─── Security Middleware ─────────────────────────────────────────────────────
 app.disable("x-powered-by");
-app.use(helmet({ contentSecurityPolicy: false, crossOriginResourcePolicy: false }));
+app.use(helmetMiddleware({ contentSecurityPolicy: false, crossOriginResourcePolicy: false }));
 
 function sanitizeMongoInput(value: unknown): void {
   if (!value || typeof value !== "object") return;
