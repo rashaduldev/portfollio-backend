@@ -4,6 +4,21 @@ import { ValidationError } from '../utils/errors.js';
 
 type RequestSource = 'body' | 'params' | 'query';
 
+function assignValidatedValue(req: Request, source: RequestSource, value: unknown): void {
+  if (source === 'query') {
+    // Express 5 exposes `req.query` through a getter. Define a request-local
+    // value instead of assigning to the read-only prototype accessor.
+    Object.defineProperty(req, 'query', {
+      value,
+      configurable: true,
+      enumerable: true,
+      writable: true,
+    });
+    return;
+  }
+  (req as Request & Record<string, unknown>)[source] = value;
+}
+
 /**
  * Validate a single request source against a Joi schema
  */
@@ -25,7 +40,7 @@ export const validate = (
   }
 
   // Assign the coerced/stripped value back
-  (req as Request & Record<string, unknown>)[source] = value;
+  assignValidatedValue(req, source, value);
   next();
 };
 
@@ -46,7 +61,7 @@ export const validateAll = (
     if (error) {
       errors.push(...error.details.map((d) => d.message.replace(/"/g, "'")));
     } else {
-      (req as Request & Record<string, unknown>)[source] = value;
+      assignValidatedValue(req, source, value);
     }
   }
 

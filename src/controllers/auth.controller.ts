@@ -22,7 +22,7 @@ export const register = catchAsync(async (req: Request, res: Response) => {
   sendSuccess(res, {
     statusCode: 201,
     message: "Account created successfully.",
-    data: { user, accessToken },
+    data: { user, accessToken, refreshToken },
   });
 });
 
@@ -35,7 +35,7 @@ export const login = catchAsync(async (req: Request, res: Response) => {
   setRefreshTokenCookie(res, refreshToken);
   sendSuccess(res, {
     message: "Logged in successfully.",
-    data: { user, accessToken },
+    data: { user, accessToken, refreshToken },
   });
 });
 
@@ -52,7 +52,7 @@ export const refreshTokens = catchAsync(async (req: Request, res: Response) => {
     "";
   const { accessToken, refreshToken } = await authService.refreshTokens(token);
   setRefreshTokenCookie(res, refreshToken);
-  sendSuccess(res, { data: { accessToken } });
+  sendSuccess(res, { data: { accessToken, refreshToken } });
 });
 
 export const forgotPassword = catchAsync(

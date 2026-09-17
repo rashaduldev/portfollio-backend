@@ -5,7 +5,7 @@ import cors from "cors";
 import morgan from "morgan";
 import compression from "compression";
 import cookieParser from "cookie-parser";
-import mongoSanitize from "express-mongo-sanitize";
+import helmet from "helmet";
 import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./config/swagger.js";
 import { morganStream } from "./config/logger.js";
@@ -27,13 +27,46 @@ import connectDB from "./config/database.js";
 
 const app: Application = express();
 
-// ─── Security Middleware (Helmet removed) ─────────────────────────────────────
-app.use(mongoSanitize());
+// ─── Security Middleware ─────────────────────────────────────────────────────
+app.disable("x-powered-by");
+app.use(helmet({ contentSecurityPolicy: false, crossOriginResourcePolicy: false }));
+
+function sanitizeMongoInput(value: unknown): void {
+  if (!value || typeof value !== "object") return;
+  if (Array.isArray(value)) {
+    value.forEach(sanitizeMongoInput);
+    return;
+  }
+
+  for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
+    if (key.startsWith("$") || key.includes(".")) {
+      delete (value as Record<string, unknown>)[key];
+    } else {
+      sanitizeMongoInput(child);
+    }
+  }
+}
+
+app.use((req, _res, next) => {
+  sanitizeMongoInput(req.body);
+  sanitizeMongoInput(req.params);
+  sanitizeMongoInput(req.query);
+  next();
+});
 
 // ─── CORS ─────────────────────────────────────────────────────────────────────
+const allowedOrigins = new Set(
+  [process.env.CLIENT_URL, ...(process.env.ALLOWED_ORIGINS ?? "").split(",")]
+    .map((origin) => origin?.trim())
+    .filter((origin): origin is string => Boolean(origin)),
+);
+
 app.use(
   cors({
-    origin: true,
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.has(origin)) return callback(null, true);
+      return callback(new Error(`Origin ${origin} is not allowed by CORS`));
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],

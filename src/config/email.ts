@@ -1,9 +1,9 @@
-import nodemailer from "nodemailer";
+import nodemailer, { type SentMessageInfo, type Transporter } from "nodemailer";
 import type { IMessage } from "../types/index.js";
 import type { EmailOptions, EmailTemplate } from "../types/index.js";
 import logger from "./logger.js";
 
-const createTransporter = (): nodemailer.Transporter =>
+const createTransporter = (): Transporter =>
   nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: parseInt(process.env.SMTP_PORT ?? "587", 10),
@@ -16,7 +16,7 @@ const createTransporter = (): nodemailer.Transporter =>
 
 export const sendEmail = async (
   options: EmailOptions,
-): Promise<nodemailer.SentMessageInfo> => {
+): Promise<SentMessageInfo> => {
   const transporter = createTransporter();
   const mailOptions = {
     from: process.env.EMAIL_FROM,
