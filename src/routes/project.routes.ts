@@ -8,6 +8,7 @@ import {
   deleteProject,
   deleteProjectImage,
   getComments,
+  getEngagement,
   addComment,
   likeProject,
 } from "../controllers/project.controller.js";
@@ -24,6 +25,7 @@ import {
 const router: Router = express.Router();
 
 router.get("/:id/comments", getComments);
+router.get("/:id/engagement", getEngagement);
 router.post("/:id/comments", validate(createCommentSchema), addComment);
 router.post("/:id/like", likeProject);
 

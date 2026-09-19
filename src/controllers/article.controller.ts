@@ -90,6 +90,11 @@ export const getComments = catchAsync(async (req: Request, res: Response) => {
   sendSuccess(res, { data: comments });
 });
 
+export const getEngagement = catchAsync(async (req: Request, res: Response) => {
+  const engagement = await articleService.getEngagement(String(req.params.id));
+  sendSuccess(res, { data: engagement });
+});
+
 // ─── Add comment to article (public) ───────────────────────────────────────
 export const addComment = catchAsync(async (req: Request, res: Response) => {
   const id = String(req.params.id);

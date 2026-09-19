@@ -10,6 +10,7 @@ import {
   getRelatedArticles,
   getTaxonomy,
   getComments,
+  getEngagement,
   addComment,
   likeArticle,
 } from "../controllers/article.controller.js";
@@ -33,6 +34,7 @@ const router: Router = express.Router();
  */
 
 router.get("/id/:id/comments", getComments);
+router.get("/id/:id/engagement", getEngagement);
 router.post("/id/:id/comments", validate(createCommentSchema), addComment);
 router.post("/id/:id/like", likeArticle);
 router.get("/taxonomy", getTaxonomy);

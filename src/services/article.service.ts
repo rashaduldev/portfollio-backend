@@ -1,4 +1,6 @@
 import Article from '../models/article.model.js';
+import mongoose from 'mongoose';
+import { engagementService } from './engagement.service.js';
 import { deleteCloudinaryFile } from '../config/cloudinary.js';
 import { NotFoundError, AuthorizationError } from '../utils/errors.js';
 import { buildSort, parsePagination, buildPaginationMeta } from '../utils/helpers.js';
@@ -156,6 +158,7 @@ export const articleService = {
   },
 
   async addComment(articleId: string, data: { name: string; content: string }) {
+    if (!mongoose.isValidObjectId(articleId)) return engagementService.addComment('article', articleId, data);
     const article = await Article.findById(articleId);
     if (!article) throw new NotFoundError('Article');
 
@@ -166,12 +169,21 @@ export const articleService = {
   },
 
   async getComments(articleId: string) {
+    if (!mongoose.isValidObjectId(articleId)) return (await engagementService.get('article', articleId)).comments;
     const article = await Article.findById(articleId).select('comments');
     if (!article) throw new NotFoundError('Article');
     return article.comments || [];
   },
 
+  async getEngagement(articleId: string) {
+    if (!mongoose.isValidObjectId(articleId)) return engagementService.get('article', articleId);
+    const article = await Article.findById(articleId).select('likes comments');
+    if (!article) throw new NotFoundError('Article');
+    return { likes: article.likes ?? 0, comments: article.comments ?? [] };
+  },
+
   async likeArticle(articleId: string) {
+    if (!mongoose.isValidObjectId(articleId)) return engagementService.like('article', articleId);
     const updated = await Article.findByIdAndUpdate(
       articleId,
       { $inc: { likes: 1 } },

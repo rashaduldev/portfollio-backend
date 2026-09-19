@@ -3,6 +3,8 @@ import { deleteCloudinaryFile } from '../config/cloudinary.js';
 import { NotFoundError, AuthorizationError } from '../utils/errors.js';
 import { buildSort, parsePagination, buildPaginationMeta } from '../utils/helpers.js';
 import type { IProject, PaginatedResult, ProjectQuery, UserRole } from '../types/index.js';
+import mongoose from 'mongoose';
+import { engagementService } from './engagement.service.js';
 
 export const projectService = {
   async getProjects(
@@ -48,12 +50,21 @@ export const projectService = {
   },
 
   async getComments(id: string) {
+    if (!mongoose.isValidObjectId(id)) return (await engagementService.get('project', id)).comments;
     const project = await Project.findById(id).select('comments');
     if (!project) throw new NotFoundError('Project');
     return project.comments || [];
   },
 
+  async getEngagement(id: string) {
+    if (!mongoose.isValidObjectId(id)) return engagementService.get('project', id);
+    const project = await Project.findById(id).select('likes comments');
+    if (!project) throw new NotFoundError('Project');
+    return { likes: project.likes ?? 0, comments: project.comments ?? [] };
+  },
+
   async addComment(id: string, data: { name: string; content: string }) {
+    if (!mongoose.isValidObjectId(id)) return engagementService.addComment('project', id, data);
     const project = await Project.findById(id);
     if (!project) throw new NotFoundError('Project');
     project.comments.push({ ...data, createdAt: new Date() });
@@ -62,6 +73,7 @@ export const projectService = {
   },
 
   async likeProject(id: string) {
+    if (!mongoose.isValidObjectId(id)) return engagementService.like('project', id);
     const project = await Project.findByIdAndUpdate(id, { $inc: { likes: 1 } }, { new: true }).select('likes');
     if (!project) throw new NotFoundError('Project');
     return project.likes;

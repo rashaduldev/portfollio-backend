@@ -26,6 +26,11 @@ export const getComments = catchAsync(async (req: Request, res: Response) => {
   sendSuccess(res, { data: comments });
 });
 
+export const getEngagement = catchAsync(async (req: Request, res: Response) => {
+  const engagement = await projectService.getEngagement(String(req.params.id));
+  sendSuccess(res, { data: engagement });
+});
+
 export const addComment = catchAsync(async (req: Request, res: Response) => {
   const comments = await projectService.addComment(String(req.params.id), req.body);
   sendSuccess(res, { statusCode: 201, message: 'Comment added.', data: comments });
