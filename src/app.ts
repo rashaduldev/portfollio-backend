@@ -59,7 +59,12 @@ app.use((req, _res, next) => {
 
 // ─── CORS ─────────────────────────────────────────────────────────────────────
 const allowedOrigins = new Set(
-  [process.env.CLIENT_URL, ...(process.env.ALLOWED_ORIGINS ?? "").split(",")]
+  [
+    "https://rashaduldev.vercel.app",
+    "http://localhost:3000",
+    process.env.CLIENT_URL,
+    ...(process.env.ALLOWED_ORIGINS ?? "").split(","),
+  ]
     .map((origin) => origin?.trim())
     .filter((origin): origin is string => Boolean(origin)),
 );
@@ -67,7 +72,8 @@ const allowedOrigins = new Set(
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || allowedOrigins.has(origin)) return callback(null, true);
+      const isPortfolioPreview = origin?.endsWith("-rashaduldevs-projects.vercel.app") ?? false;
+      if (!origin || allowedOrigins.has(origin) || isPortfolioPreview) return callback(null, true);
       return callback(new Error(`Origin ${origin} is not allowed by CORS`));
     },
     credentials: true,
