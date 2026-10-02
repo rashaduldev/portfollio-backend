@@ -33,11 +33,13 @@ const projectSchema = new Schema<IProject>(
     order:      { type: Number, default: 0 },
     views:      { type: Number, default: 0 },
     likes:      { type: Number, default: 0 },
+    likedBy: [{ type: String, select: false }],
     comments: [
       {
         name: { type: String, required: true, trim: true },
         content: { type: String, required: true, trim: true },
         createdAt: { type: Date, default: Date.now },
+        visitorHash: { type: String, select: false },
       },
     ],
   },

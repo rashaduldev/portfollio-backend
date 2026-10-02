@@ -5,6 +5,7 @@ export interface EngagementComment {
   name: string;
   content: string;
   createdAt: Date;
+  visitorHash?: string;
 }
 
 export interface ContentEngagement {
@@ -12,16 +13,19 @@ export interface ContentEngagement {
   resourceId: string;
   likes: number;
   comments: EngagementComment[];
+  likedBy: string[];
 }
 
 const engagementSchema = new Schema<ContentEngagement>({
   resourceType: { type: String, enum: ['article', 'project'], required: true },
   resourceId: { type: String, required: true, trim: true },
   likes: { type: Number, default: 0, min: 0 },
+  likedBy: [{ type: String, select: false }],
   comments: [{
     name: { type: String, required: true, trim: true, minlength: 2, maxlength: 100 },
     content: { type: String, required: true, trim: true, minlength: 1, maxlength: 1000 },
     createdAt: { type: Date, default: Date.now },
+    visitorHash: { type: String, select: false },
   }],
 }, { timestamps: true });
 

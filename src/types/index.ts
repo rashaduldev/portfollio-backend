@@ -152,7 +152,8 @@ export interface IProject extends Document {
   order: number;
   views: number;
   likes: number;
-  comments: { name: string; content: string; createdAt: Date }[];
+  likedBy?: string[];
+  comments: { _id?: Types.ObjectId; name: string; content: string; createdAt: Date; visitorHash?: string }[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -177,7 +178,8 @@ export interface IArticle extends Document {
   readingTime?: number;
   views: number;
   likes?: number;
-  comments?: { name: string; content: string; createdAt: Date }[];
+  likedBy?: string[];
+  comments?: { _id?: Types.ObjectId; name: string; content: string; createdAt: Date; visitorHash?: string }[];
   isFeatured: boolean;
   metaTitle?: string;
   metaDescription?: string;

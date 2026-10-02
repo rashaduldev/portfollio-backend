@@ -13,6 +13,8 @@ import {
   getEngagement,
   addComment,
   likeArticle,
+  updateComment,
+  deleteComment,
 } from "../controllers/article.controller.js";
 import { protect, optionalAuth } from "../middleware/auth.middleware.js";
 import { validate } from "../middleware/validate.middleware.js";
@@ -21,6 +23,7 @@ import {
   createArticleSchema,
   updateArticleSchema,
   createCommentSchema,
+  updateCommentSchema,
   paginationSchema,
 } from "../validators/index.validator.js";
 
@@ -36,6 +39,8 @@ const router: Router = express.Router();
 router.get("/id/:id/comments", getComments);
 router.get("/id/:id/engagement", getEngagement);
 router.post("/id/:id/comments", validate(createCommentSchema), addComment);
+router.patch("/id/:id/comments/:commentId", validate(updateCommentSchema), updateComment);
+router.delete("/id/:id/comments/:commentId", deleteComment);
 router.post("/id/:id/like", likeArticle);
 router.get("/taxonomy", getTaxonomy);
 

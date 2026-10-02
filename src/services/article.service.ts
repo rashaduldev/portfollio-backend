@@ -1,8 +1,8 @@
 import Article from '../models/article.model.js';
 import mongoose from 'mongoose';
-import { engagementService } from './engagement.service.js';
+import { engagementService, hashVisitor, publicComments } from './engagement.service.js';
 import { deleteCloudinaryFile } from '../config/cloudinary.js';
-import { NotFoundError, AuthorizationError } from '../utils/errors.js';
+import { NotFoundError, AuthorizationError, ConflictError, ValidationError } from '../utils/errors.js';
 import { buildSort, parsePagination, buildPaginationMeta } from '../utils/helpers.js';
 import type {
   IArticle,
@@ -157,39 +157,78 @@ export const articleService = {
     };
   },
 
-  async addComment(articleId: string, data: { name: string; content: string }) {
-    if (!mongoose.isValidObjectId(articleId)) return engagementService.addComment('article', articleId, data);
-    const article = await Article.findById(articleId);
-    if (!article) throw new NotFoundError('Article');
-
-    article.comments = article.comments || [];
-    article.comments.push({ name: data.name, content: data.content, createdAt: new Date() } as any);
-    await article.save();
-    return article.comments;
+  async addComment(articleId: string, data: { name: string; content: string }, visitorId: string) {
+    if (!mongoose.isValidObjectId(articleId)) return engagementService.addComment('article', articleId, data, visitorId);
+    const visitorHash = hashVisitor(visitorId);
+    const article = await Article.findOneAndUpdate(
+      { _id: articleId, comments: { $not: { $elemMatch: { visitorHash } } } },
+      { $push: { comments: { ...data, visitorHash, createdAt: new Date() } } },
+      { new: true },
+    ).select('+comments.visitorHash');
+    if (!article) {
+      if (!(await Article.exists({ _id: articleId }))) throw new NotFoundError('Article');
+      throw new ConflictError('You already commented on this article. You can edit or delete your existing comment.');
+    }
+    return publicComments(article.comments ?? [], visitorId);
   },
 
-  async getComments(articleId: string) {
-    if (!mongoose.isValidObjectId(articleId)) return (await engagementService.get('article', articleId)).comments;
-    const article = await Article.findById(articleId).select('comments');
+  async getComments(articleId: string, visitorId?: string) {
+    if (!mongoose.isValidObjectId(articleId)) return (await engagementService.get('article', articleId, visitorId)).comments;
+    const article = await Article.findById(articleId).select('comments +comments.visitorHash');
     if (!article) throw new NotFoundError('Article');
-    return article.comments || [];
+    return publicComments(article.comments ?? [], visitorId);
   },
 
-  async getEngagement(articleId: string) {
-    if (!mongoose.isValidObjectId(articleId)) return engagementService.get('article', articleId);
-    const article = await Article.findById(articleId).select('likes comments');
+  async getEngagement(articleId: string, visitorId?: string) {
+    if (!mongoose.isValidObjectId(articleId)) return engagementService.get('article', articleId, visitorId);
+    const article = await Article.findById(articleId).select('likes comments +comments.visitorHash +likedBy');
     if (!article) throw new NotFoundError('Article');
-    return { likes: article.likes ?? 0, comments: article.comments ?? [] };
+    const visitorHash = visitorId ? hashVisitor(visitorId) : undefined;
+    return {
+      likes: article.likes ?? 0,
+      comments: publicComments(article.comments ?? [], visitorId),
+      hasLiked: Boolean(visitorHash && article.likedBy?.includes(visitorHash)),
+    };
   },
 
-  async likeArticle(articleId: string) {
-    if (!mongoose.isValidObjectId(articleId)) return engagementService.like('article', articleId);
+  async likeArticle(articleId: string, visitorId: string) {
+    if (!mongoose.isValidObjectId(articleId)) return engagementService.like('article', articleId, visitorId);
+    const visitorHash = hashVisitor(visitorId);
     const updated = await Article.findByIdAndUpdate(
-      articleId,
-      { $inc: { likes: 1 } },
+      { _id: articleId, likedBy: { $ne: visitorHash } },
+      { $inc: { likes: 1 }, $addToSet: { likedBy: visitorHash } },
       { new: true }
     ).select('likes');
-    if (!updated) throw new NotFoundError('Article');
+    if (!updated) {
+      if (!(await Article.exists({ _id: articleId }))) throw new NotFoundError('Article');
+      throw new ConflictError('You already liked this article from this device.');
+    }
     return updated.likes;
+  },
+
+  async updateOwnComment(articleId: string, commentId: string, content: string, visitorId: string) {
+    if (!mongoose.isValidObjectId(articleId)) return engagementService.updateOwnComment('article', articleId, commentId, content, visitorId);
+    if (!mongoose.isValidObjectId(commentId)) throw new ValidationError('Invalid comment ID');
+    const visitorHash = hashVisitor(visitorId);
+    const article = await Article.findOneAndUpdate(
+      { _id: articleId, comments: { $elemMatch: { _id: commentId, visitorHash } } },
+      { $set: { 'comments.$.content': content } },
+      { new: true },
+    ).select('comments +comments.visitorHash');
+    if (!article) throw new AuthorizationError('You can only edit your own comment.');
+    return publicComments(article.comments ?? [], visitorId);
+  },
+
+  async deleteOwnComment(articleId: string, commentId: string, visitorId: string) {
+    if (!mongoose.isValidObjectId(articleId)) return engagementService.deleteOwnComment('article', articleId, commentId, visitorId);
+    if (!mongoose.isValidObjectId(commentId)) throw new ValidationError('Invalid comment ID');
+    const visitorHash = hashVisitor(visitorId);
+    const article = await Article.findOneAndUpdate(
+      { _id: articleId, comments: { $elemMatch: { _id: commentId, visitorHash } } },
+      { $pull: { comments: { _id: commentId, visitorHash } } },
+      { new: true },
+    ).select('comments +comments.visitorHash');
+    if (!article) throw new AuthorizationError('You can only delete your own comment.');
+    return publicComments(article.comments ?? [], visitorId);
   },
 };

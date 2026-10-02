@@ -44,11 +44,13 @@ const articleSchema = new Schema<IArticle>(
     publishedAt: { type: Date },
     readingTime: { type: Number },
     likes: { type: Number, default: 0 },
+    likedBy: [{ type: String, select: false }],
     comments: [
       {
         name: { type: String, required: true },
         content: { type: String, required: true },
         createdAt: { type: Date, default: Date.now },
+        visitorHash: { type: String, select: false },
       },
     ],
     views: { type: Number, default: 0 },

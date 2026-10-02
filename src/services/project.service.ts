@@ -1,10 +1,10 @@
 import Project from '../models/project.model.js';
 import { deleteCloudinaryFile } from '../config/cloudinary.js';
-import { NotFoundError, AuthorizationError } from '../utils/errors.js';
+import { NotFoundError, AuthorizationError, ConflictError, ValidationError } from '../utils/errors.js';
 import { buildSort, parsePagination, buildPaginationMeta } from '../utils/helpers.js';
 import type { IProject, PaginatedResult, ProjectQuery, UserRole } from '../types/index.js';
 import mongoose from 'mongoose';
-import { engagementService } from './engagement.service.js';
+import { engagementService, hashVisitor, publicComments } from './engagement.service.js';
 
 export const projectService = {
   async getProjects(
@@ -49,34 +49,79 @@ export const projectService = {
     return project;
   },
 
-  async getComments(id: string) {
-    if (!mongoose.isValidObjectId(id)) return (await engagementService.get('project', id)).comments;
-    const project = await Project.findById(id).select('comments');
+  async getComments(id: string, visitorId?: string) {
+    if (!mongoose.isValidObjectId(id)) return (await engagementService.get('project', id, visitorId)).comments;
+    const project = await Project.findById(id).select('comments +comments.visitorHash');
     if (!project) throw new NotFoundError('Project');
-    return project.comments || [];
+    return publicComments(project.comments || [], visitorId);
   },
 
-  async getEngagement(id: string) {
-    if (!mongoose.isValidObjectId(id)) return engagementService.get('project', id);
-    const project = await Project.findById(id).select('likes comments');
+  async getEngagement(id: string, visitorId?: string) {
+    if (!mongoose.isValidObjectId(id)) return engagementService.get('project', id, visitorId);
+    const project = await Project.findById(id).select('likes comments +comments.visitorHash +likedBy');
     if (!project) throw new NotFoundError('Project');
-    return { likes: project.likes ?? 0, comments: project.comments ?? [] };
+    const visitorHash = visitorId ? hashVisitor(visitorId) : undefined;
+    return {
+      likes: project.likes ?? 0,
+      comments: publicComments(project.comments ?? [], visitorId),
+      hasLiked: Boolean(visitorHash && project.likedBy?.includes(visitorHash)),
+    };
   },
 
-  async addComment(id: string, data: { name: string; content: string }) {
-    if (!mongoose.isValidObjectId(id)) return engagementService.addComment('project', id, data);
-    const project = await Project.findById(id);
-    if (!project) throw new NotFoundError('Project');
-    project.comments.push({ ...data, createdAt: new Date() });
-    await project.save();
-    return project.comments;
+  async addComment(id: string, data: { name: string; content: string }, visitorId: string) {
+    if (!mongoose.isValidObjectId(id)) return engagementService.addComment('project', id, data, visitorId);
+    const visitorHash = hashVisitor(visitorId);
+    const project = await Project.findOneAndUpdate(
+      { _id: id, comments: { $not: { $elemMatch: { visitorHash } } } },
+      { $push: { comments: { ...data, visitorHash, createdAt: new Date() } } },
+      { new: true },
+    ).select('comments +comments.visitorHash');
+    if (!project) {
+      if (!(await Project.exists({ _id: id }))) throw new NotFoundError('Project');
+      throw new ConflictError('You already commented on this project. You can edit or delete your existing comment.');
+    }
+    return publicComments(project.comments, visitorId);
   },
 
-  async likeProject(id: string) {
-    if (!mongoose.isValidObjectId(id)) return engagementService.like('project', id);
-    const project = await Project.findByIdAndUpdate(id, { $inc: { likes: 1 } }, { new: true }).select('likes');
-    if (!project) throw new NotFoundError('Project');
+  async likeProject(id: string, visitorId: string) {
+    if (!mongoose.isValidObjectId(id)) return engagementService.like('project', id, visitorId);
+    const visitorHash = hashVisitor(visitorId);
+    const project = await Project.findOneAndUpdate(
+      { _id: id, likedBy: { $ne: visitorHash } },
+      { $inc: { likes: 1 }, $addToSet: { likedBy: visitorHash } },
+      { new: true },
+    ).select('likes');
+    if (!project) {
+      if (!(await Project.exists({ _id: id }))) throw new NotFoundError('Project');
+      throw new ConflictError('You already liked this project from this device.');
+    }
     return project.likes;
+  },
+
+  async updateOwnComment(id: string, commentId: string, content: string, visitorId: string) {
+    if (!mongoose.isValidObjectId(id)) return engagementService.updateOwnComment('project', id, commentId, content, visitorId);
+    if (!mongoose.isValidObjectId(commentId)) throw new ValidationError('Invalid comment ID');
+    const visitorHash = hashVisitor(visitorId);
+    const project = await Project.findOneAndUpdate(
+      { _id: id, comments: { $elemMatch: { _id: commentId, visitorHash } } },
+      { $set: { 'comments.$.content': content } },
+      { new: true },
+    ).select('comments +comments.visitorHash');
+    if (!project) throw new AuthorizationError('You can only edit your own comment.');
+    return publicComments(project.comments, visitorId);
+  },
+
+  async deleteOwnComment(id: string, commentId: string, visitorId: string) {
+    if (!mongoose.isValidObjectId(id)) return engagementService.deleteOwnComment('project', id, commentId, visitorId);
+    if (!mongoose.isValidObjectId(commentId)) throw new ValidationError('Invalid comment ID');
+    const visitorHash = hashVisitor(visitorId);
+    const project = await Project.findOneAndUpdate(
+      { _id: id, comments: { $elemMatch: { _id: commentId, visitorHash } } },
+      { $pull: { comments: { _id: commentId, visitorHash } } },
+      { new: true },
+    ).select('comments +comments.visitorHash');
+    if (!project) throw new AuthorizationError('You can only delete your own comment.');
+    return publicComments(project.comments, visitorId);
   },
 
   async createProject(

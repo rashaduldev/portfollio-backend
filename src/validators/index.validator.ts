@@ -152,6 +152,10 @@ export const createCommentSchema = Joi.object({
   content: Joi.string().trim().min(1).max(1000).required(),
 });
 
+export const updateCommentSchema = Joi.object({
+  content: Joi.string().trim().min(1).max(1000).required(),
+});
+
 // ─── Pagination / Filter (shared) ────────────────────────────────────────────
 export const paginationSchema = Joi.object({
   page: Joi.number().integer().min(1).default(1),

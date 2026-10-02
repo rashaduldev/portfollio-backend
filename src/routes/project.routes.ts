@@ -11,6 +11,8 @@ import {
   getEngagement,
   addComment,
   likeProject,
+  updateComment,
+  deleteComment,
 } from "../controllers/project.controller.js";
 import { protect, optionalAuth } from "../middleware/auth.middleware.js";
 import { validate } from "../middleware/validate.middleware.js";
@@ -20,6 +22,7 @@ import {
   updateProjectSchema,
   paginationSchema,
   createCommentSchema,
+  updateCommentSchema,
 } from "../validators/index.validator.js";
 
 const router: Router = express.Router();
@@ -27,6 +30,8 @@ const router: Router = express.Router();
 router.get("/:id/comments", getComments);
 router.get("/:id/engagement", getEngagement);
 router.post("/:id/comments", validate(createCommentSchema), addComment);
+router.patch("/:id/comments/:commentId", validate(updateCommentSchema), updateComment);
+router.delete("/:id/comments/:commentId", deleteComment);
 router.post("/:id/like", likeProject);
 
 /**
