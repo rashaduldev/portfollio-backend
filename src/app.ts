@@ -23,6 +23,8 @@ import uploadRoutes from "./routes/upload.routes.js";
 import resumeRoutes from "./routes/resume.routes.js";
 import settingsRoutes from "./routes/settings.routes.js";
 import engagementRoutes from "./routes/engagement.routes.js";
+import analyticsRoutes from "./routes/analytics.routes.js";
+import adminRoutes from "./routes/admin.routes.js";
 import mongoose from "mongoose";
 import connectDB from "./config/database.js";
 
@@ -79,7 +81,7 @@ app.use(
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "X-Visitor-ID"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "X-Visitor-ID", "X-Session-ID"],
   }),
 );
 
@@ -180,6 +182,8 @@ app.use(`${API}/upload`, uploadRoutes);
 app.use(`${API}/resume`, resumeRoutes);
 app.use(`${API}/settings`, settingsRoutes);
 app.use(`${API}/engagement`, engagementRoutes);
+app.use(`${API}/analytics`, analyticsRoutes);
+app.use(`${API}/admin`, adminRoutes);
 
 // ─── Error Handling ──────────────────────────────────────────────────────────
 app.use(notFound);
